@@ -15,6 +15,12 @@ font = cv2.FONT_HERSHEY_SIMPLEX
 def _main():  # Test Routine
 
     video_capture = cv2.VideoCapture(0)
+
+    roi_gray = None
+    roi_color = None
+    x = None
+    y = None
+
     while True:
         # Capture frame-by-frame
         ret, frame = video_capture.read()
