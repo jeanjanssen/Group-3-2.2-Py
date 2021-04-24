@@ -26,7 +26,7 @@ def _main():
     cv2.imshow('Emotion Detection Image', bgr_img)
 
     cv2.waitKey(0)
-    cv2.destroyWindow('Friends')
+    cv2.destroyWindow('Emotion Detection Image')
 
 
 if __name__ == '__main__':
