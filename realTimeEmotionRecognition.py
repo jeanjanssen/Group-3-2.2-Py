@@ -23,7 +23,7 @@ def _main():
     predictions = DeepFace.analyze(bgr_img)
     print (predictions)
 
-    cv2.imshow('Friends', bgr_img)
+    cv2.imshow('Emotion Detection Image', bgr_img)
 
     cv2.waitKey(0)
     cv2.destroyWindow('Friends')
