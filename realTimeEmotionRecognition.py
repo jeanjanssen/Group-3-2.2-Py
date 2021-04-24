@@ -19,6 +19,7 @@ cascPath = os.path.dirname(cv2.__file__) + "/data/haarcascade_frontalface_alt2.x
 
 faceCascade = cv2.CascadeClassifier(cascPath)
 
+
 def _main():
     # DONE FOR A TEST IMAGE
     """
@@ -42,8 +43,9 @@ def _main():
         raise IOError('Webcam cannot be opened')
 
     while True:
+
         ret, frame = cap.read()  # This allows us to read one image from a video
-        result = DeepFace.analyze(frame, actions=['emotion'])
+        result = DeepFace.analyze(frame, actions=['emotion'], enforce_detection=False)
 
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 
