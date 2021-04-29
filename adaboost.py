@@ -1,20 +1,50 @@
+'''
+In machine learning, boosting is an ensemble technique used for trying to create a strong classifier from a set of weak
+classifiers. We use this for predictive modelling problems. To iterate on boosting, we first build a model from the
+training data, and then create a second model utilizing the errors from the first model to better correct it in the
+second model. Models continue to be added until the training set is predicted perfectly, or we reach the limited
+number of models that we will make. In addition, it should be noted that we do not want to overfit our model to the
+training data.
+
+History on adaboost, adaboost was the first really successful boosting algorithm developed for binary classification.
+How do we learn an adaboost model from given data? We know that we use adaboosting to boost the performance of decision
+trees on binary classification problems. Side note: it is best used on weak classifiers (how to define weak learners:
+these learners achieve an accuracy just above random chance on a classification problem). The most suited case is to
+use adaboost with decision trees with one level. This is because these trees are so short and only include one
+decision for classification. They are often called decision stumps.
+
+Adaboost ensemble: weak classifiers are added sequentially. They are trained using the weighted training data. After
+you have the number of weak classifiers you want, you are left with a pool of weak learners each with a stage value.
+
+Making predictions: prediction are made by calculating the weighted average of the weak classifiers. For each new
+input instance, each weak learner calculates a predicted value as either +1.0 or -1.0.
+
+Note: Some stumps get more say in the classification than others (they dont have equal importance).
+Each stump is made bt taking the previous stump's mistakes into account (therefore, order of the stumps is important).
+
+'''
+
 import numpy as np
 
 
 class DecisionStump:
 
+
     def __init__(self):
-        self.polarity = 1
+        self.polarity = 1   # Polarity is for indicating the direction of the inequality (taking one classification
+        # over the other i.e. error over correctness and vice versa)
         self.feature_index = None
         self.threshold = None
         self.alpha = None
 
+
+    # The prediciction method will take in our image.
     def predict(self, X):
         n_samples = X.shape[0]
-        X_col = X[:, self.feature_index]
+        X_col = X[:, self.feature_index] # We will look down by columns for on a specific feature index.
 
-        predictions = np.ones(n_samples)
-        if self.polarity == 1:
+        predictions = np.ones(n_samples) # Looking at our samples, we will convert them to 1's in our matrix.
+        if self.polarity == 1:  # We will calculate our predictions given our polarity == 1
             predictions[X_col < self.threshold] = -1
         else:
             predictions[X_col > self.threshold] = -1
