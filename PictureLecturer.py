@@ -4,6 +4,7 @@ import os
 
 def load_images_from_folder(folder):
     imagesArray = []
+    print('hello')
     for filename in os.listdir(folder):
         img = cv2.imread(os.path.join(folder, filename))
         if img is not None:

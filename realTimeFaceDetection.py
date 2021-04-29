@@ -54,16 +54,8 @@ def _main():  # Test Routine
             cv2.putText(frame, 'Eye', (x + ex, y + ey), 1, 1, (0, 255, 0), 1)
 
         cv2.putText(frame, 'Number of Faces : ' + str(len(faces)), (40, 40), font, 1, (255, 0, 0), 2)
-
-        # Here we display if we detect the smile cascade and display the 'emotion'
-        cv2.putText(frame, 'Smile: ' + str(len(smile)), (40, 70), font, 1, (0, 255, 0), 2)
-
-        #while len(smile) >= 1:
-            #cv2.putText(frame, "Emotion: Happy", (40, 90), font, 1, (0, 255, 0), 2)
-
         # Display the resulting frame
         cv2.imshow('Video', frame)
-
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break
     video_capture.release()
