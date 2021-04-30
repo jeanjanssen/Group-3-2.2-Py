@@ -29,36 +29,36 @@ import numpy as np
 
 class DecisionStump:
 
-
     def __init__(self):
-        self.polarity = 1   # Polarity is for indicating the direction of the inequality (taking one classification
+        self.polarity = 1  # Polarity is for indicating the direction of the inequality (taking one classification
         # over the other i.e. error over correctness and vice versa)
-        self.feature_index = None
-        self.threshold = None
-        self.alpha = None
+        self.feature_index = None  # Feature index indicates the feature we specify
+        self.threshold = None  # Threshold is set for our accuracy in training
+        self.alpha = None  # Alpha is the weight (amount of say) for each decision stump
 
-
-    # The prediciction method will take in our image.
+    # The prediction method will take in our image. This will return the predictions for each decision stump.
     def predict(self, X):
         n_samples = X.shape[0]
-        X_col = X[:, self.feature_index] # We will look down by columns for on a specific feature index.
+        X_col = X[:, self.feature_index]  # We will look down by columns for on a specific feature index.
 
-        predictions = np.ones(n_samples) # Looking at our samples, we will convert them to 1's in our matrix.
+        predictions = np.ones(n_samples)  # Looking at our samples, we will convert them to 1's in our matrix.
         if self.polarity == 1:  # We will calculate our predictions given our polarity == 1
-            predictions[X_col < self.threshold] = -1
+            predictions[X_col < self.threshold] = -1  # Our prediction samples will be 1 and -1 for anything below
+            # the threshold
         else:
-            predictions[X_col > self.threshold] = -1
+            predictions[X_col > self.threshold] = -1  # Taking the opposite, we classify everything above the threshold
+            # as -1
         return predictions
 
 
 class Adaboost:
 
-    def __init__(self, n_classifiers=5):
+    def __init__(self, n_classifiers=5):  # Here we define the number of weak classifiers we want to perform boosting on
         self.n_classifiers = n_classifiers
 
     # the training of the adaboost
     def fit(self, X, y):
-        n_samples, n_features = X.shape
+        n_samples, n_features = X.shape  # Defining our samples and features in order to fit below
 
         # initialize the weights
         w = np.full(n_samples, (1 / n_samples))
@@ -76,31 +76,37 @@ class Adaboost:
                 for threshold in thresholds:
                     p = 1
                     predictions = np.ones(n_samples)
-                    predictions[X_col < self.threshold] = -1
+                    predictions[X_col < self.threshold] = -1  # We set above and below the threshold depending on the
+                    # polarity value
 
                     missclassified = w[y != predictions]
-                    error = sum(missclassified)
+                    error = sum(missclassified)  # We get the total error on our misclassified instances
 
-                    if error > 0.5:
+                    if error > 0.5:  # This is above the random classification, which is exactly what we want in
+                        # order to add value to the final classification (weak classifier).
                         error = 1 - error
-                        p = -1
+                        p = -1  # Do add value to the final decision, we can reverse the polarity and take the other
+                        # side of the accuracy gain
 
-                    if error < min_error:
+                    if error < min_error:  # This checks the new calculated error. We will reset everything based on
+                        # this. Therefore, we can use it for the next iteration.
                         min_error = error
                         classifier.polarity = p
                         classifier.threshold = threshold
                         classifier.feature_index = feature_i
 
-        epsilon = 1e-10
-        classifier.alpha = 0.5 * np.log((1-error)/(error+epsilon))
+        epsilon = 1e-10  # initializing epsilon which will be used in the below equation
+        # This is the equation for the amount of say for each of the decision stumps has on the final classification
+        classifier.alpha = 0.5 * np.log((1 - error) / (error + epsilon))
 
-        predictions = classifier.predict(X)
+        predictions = classifier.predict(X)  # running the prediction
 
-        w *= np.exp(-classifier.alpha*y*predictions)
-        w /= np.sum(w)
+        w *= np.exp(-classifier.alpha * y * predictions)  # equation for calculating the weight
+        w /= np.sum(w)  # summing the instance weights
 
         self.classifiers.append(classifier)
 
+    # Here we perform predictions utilizing each decision stump
     def predict(self, X):
         classifier_predictions = [classifier.alpha(X) for classifier in self.classifiers]
         y_predictions = np.sum(classifier_predictions, axis=0)
