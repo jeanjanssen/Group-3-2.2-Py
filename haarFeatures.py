@@ -7,9 +7,10 @@ np.set_printoptions(threshold=np.inf)
 image_path = 'images\\'
 image_list = os.listdir(image_path)
 
-values = np.zeros((1, 1))
+matrixList = []
 
 for image in image_list:
+    values = np.zeros((1, 1))
     img = cv2.imread(image_path + image)
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     height = 224
@@ -22,5 +23,7 @@ for image in image_list:
         for j in range(rounded_width-1):
             values[i, j] = gray[i, j]
 
+    matrixList.append(values)
+    print(type(values))
 
-print(values)
+print(len(matrixList))
