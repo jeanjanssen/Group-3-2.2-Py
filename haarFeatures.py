@@ -34,7 +34,5 @@ for image in image_list:
 
     matrixList.append(values)
 
-print(len(matrixList))
-
 #print(values)
 print(integral_image)
