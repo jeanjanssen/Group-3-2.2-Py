@@ -1,6 +1,7 @@
 import numpy as np
 from sklearn import datasets
 from sklearn.model_selection import train_test_split
+from sklearn.metrics import mean_absolute_error
 
 from adaboost import Adaboost
 
@@ -29,3 +30,6 @@ y_pred = classifier.predict(X_test)  # performing on our test data
 # calculating and printing the accuracy
 acc = accuracy(y_test, y_pred)
 print("Accuracy= ", acc)
+
+# calculating the mean absolute error for accuracy for comparison
+print(mean_absolute_error(y_test, y_pred))
