@@ -6,7 +6,7 @@ from numpy.lib import math
 image_path = 'images\\'
 image_list = os.listdir(image_path)
 
-matrixList = []
+integral_array = []
 integral_image = np.zeros((1, 1))
 
 for image in image_list:
@@ -32,62 +32,69 @@ for image in image_list:
             else:
                 integral_image[k, l] = integral_image[k - 1, l] + sumM
 
-    matrixList.append(values)
+    integral_array.append(values)
 
 
 # print(values)
 # print(integral_image)
 
+class Haar(object):
+    def edge_vertical(self, x, y, w, h, jesus):
+        coords_vertical = [(x, y), (x + w / 2, y), (x + w, y), (x, y + h), (x + w / 2, y + h), (x + w, y + h)]
+        mat_e_vert = np.zeros((w, h))
+        for i in range(h):
+            for j in range(w):
+                if j < w // 2:
+                    mat_e_vert[i, j] = 0
+                else:
+                    mat_e_vert[i, j] = 1
 
-def edge_vertical(x, y, w, h):
-    coordsVertical = [(x, y), (x + w / 2, y), (x + w, y), (x, y - h), (x + w / 2, y - h), (x + w, y - h)]
-    mat_e_vert = np.zeros((w, h))
-    for i in range(h):
-        for j in range(w):
-            if j < w / 2:
-                mat_e_vert[i, j] = 0
-            else:
-                mat_e_vert[i, j] = 1
-    return mat_e_vert
+        integral_im = integral_array[jesus]
+        sum_pixels = h * w//2
+        light_pixel = (integral_im[x + w//2 - 1, y + h] - integral_im[x + w//2 - 1, y + 1] - integral_im[
+            x - 1, y + h] + integral_im[x - 1, y - 1]) / sum_pixels
+        dark_pixel = (integral_im[x + w - 1 - 1, y + h] - integral_im[x + w//2 - 1, y + h] - integral_im[
+            x + w - 1, y - 1] + integral_im[x + w//2 - 1, y - 1]) / sum_pixels
+        total_val = dark_pixel - light_pixel
+
+        return total_val
+
+    def edge_horizontal(self, x, y, w, h):
+        coords_horizontal = [(x, y), (x + w, y), (x, y - h / 2), (x, y - h), (x + w, y - h / 2), (x + w, y - h)]
+        mat_e_hor = np.zeros((w, h))
+        for i in range(h):
+            for j in range(w):
+                if i < h / 2:
+                    mat_e_hor[i, j] = 0
+                else:
+                    mat_e_hor[i, j] = 1
+        return mat_e_hor
+
+    def line_vertical(self, x, y, w, h):
+        coords_line_vert = [(x, y), (x + math.floor(w / 3), y), (x + 2 * math.floor(w / 3), y), (x + w, y), (x, y - h),
+                          (x + math.floor(w / 3), y - h), (x + 2 * math.floor(w / 3), y - h), (x + w, y - h)]
+        mat_l_vert = np.zeros((w, h))
+        for i in range(h):
+            for j in range(w):
+                if j < math.floor(w / 3) or j >= 2 * math.floor(w / 3):
+                    mat_l_vert[i, j] = 0
+                else:
+                    mat_l_vert[i, j] = 1
+        return mat_l_vert
+
+    def line_horizontal(self, x, y, w, h):
+        coords_line_hor = [(x, y), (x + w, y), (x, y - math.floor(h / 3)), (x, y - 2 * math.floor(h / 3)), (x, y - h),
+                         (x + w, y - math.floor(h / 3)), (x + w, y - 2 * math.floor(h / 3)), (x + w, y - h)]
+        mat_l_hor = np.zeros((w, h))
+        for i in range(h):
+            for j in range(w):
+                if i < math.floor(h / 3) or i >= 2 * math.floor(h / 3):
+                    mat_l_hor[i, j] = 0
+                else:
+                    mat_l_hor[i, j] = 1
+        return mat_l_hor
 
 
-def edge_horizontal(x, y, w, h):
-    coordsHorizontal = [(x, y), (x + w, y), (x, y - h / 2), (x, y - h), (x + w, y - h / 2), (x + w, y - h)]
-    mat_e_hor = np.zeros((w, h))
-    for i in range(h):
-        for j in range(w):
-            if i < h / 2:
-                mat_e_hor[i, j] = 0
-            else:
-                mat_e_hor[i, j] = 1
-    return mat_e_hor
-
-
-def line_vertical(x, y, w, h):
-    coordsLineVert = [(x, y), (x + math.floor(w / 3), y), (x + 2 * math.floor(w / 3), y), (x + w, y), (x, y - h),
-                      (x + math.floor(w / 3), y - h), (x + 2 * math.floor(w / 3), y - h), (x + w, y - h)]
-    mat_l_vert = np.zeros((w, h))
-    for i in range(h):
-        for j in range(w):
-            if j < math.floor(w / 3) or j >= 2 * math.floor(w / 3):
-                mat_l_vert[i, j] = 0
-            else:
-                mat_l_vert[i, j] = 1
-    return mat_l_vert
-
-
-def line_horizontal(x, y, w, h):
-    coordsLineHor = [(x, y), (x + w, y), (x, y - math.floor(h / 3)), (x, y - 2 * math.floor(h / 3)), (x, y - h),
-                     (x + w, y - math.floor(h / 3)), (x + w, y - 2 * math.floor(h / 3)), (x + w, y - h)]
-    mat_l_hor = np.zeros((w, h))
-    for i in range(h):
-        for j in range(w):
-            if i < math.floor(h / 3) or i >= 2 * math.floor(h / 3):
-                mat_l_hor[i, j] = 0
-            else:
-                mat_l_hor[i, j] = 1
-    return mat_l_hor
-
-
-test = line_vertical(0, 0, 6, 6)
+test = Haar.edge_vertical(object, 0, 0, 6, 6, 3)
 print(test)
+
