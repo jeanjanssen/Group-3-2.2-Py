@@ -39,7 +39,7 @@ for image in image_list:
 # print(integral_image)
 
 
-def edge_vertical(x, y, w, h):
+def edge_vertical(x, y, w, k):
     coordsVertical = [(x, y), (x + w / 2, y), (x + w, y), (x, y - h), (x + w / 2, y - h), (x + w, y - h)]
     mat_e_vert = np.zeros((w, h))
     for i in range(h):
@@ -48,7 +48,16 @@ def edge_vertical(x, y, w, h):
                 mat_e_vert[i, j] = 0
             else:
                 mat_e_vert[i, j] = 1
-    return mat_e_vert
+    
+    integral_im = integral_array[k]
+    sum_pixels = h * w//2
+    light_pixel = (integral_im[x + w//2 - 1, y + h] - integral_im[x + w//2 - 1, y + 1] - integral_im[
+        x - 1, y + h] + integral_im[x - 1, y - 1]) / sum_pixels
+    dark_pixel = (integral_im[x + w - 1 - 1, y + h] - integral_im[x + w//2 - 1, y + h] - integral_im[
+        x + w - 1, y - 1] + integral_im[x + w//2 - 1, y - 1]) / sum_pixels
+    total_val = dark_pixel - light_pixel
+
+    return total_val
 
 
 def edge_horizontal(x, y, w, h):
@@ -89,5 +98,5 @@ def line_horizontal(x, y, w, h):
     return mat_l_hor
 
 
-test = line_vertical(0, 0, 6, 6)
+test = line_vertical(0, 0, 6, 6, 3)
 print(test)
