@@ -55,7 +55,18 @@ class Adaboost:
 
     def __init__(self, n_classifiers=5):  # Here we define the number of weak classifiers we want to perform boosting on
         self.n_classifiers = n_classifiers
-
+    
+    x_coord = 1
+    y_coord = 1
+    w = 200
+    h = 300
+    feature = Haar()
+    feature_score = 0
+    im_list = feature.image_list
+    for i in range(len(im_list)):
+        feature_score = feature_score + feature.edge_vertical(x_coord, y_coord, w, h, i)
+    final_score = feature_score / len(im_list)
+    
     # the training of the adaboost
     def fit(self, X, y):
         n_samples, n_features = X.shape  # Defining our samples and features in order to fit below
