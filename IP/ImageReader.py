@@ -1,4 +1,5 @@
 import cv2
+import os
 import numpy as np
 from numpy.lib import math
 
@@ -7,10 +8,18 @@ class ImageReader:
     def __init__(self):
         self.values = np.zeros((1, 1))
 
+    def load_images_from_folder(self, folder):
+        images = []
+        for filename in os.listdir(folder):
+            img = cv2.imread(os.path.join(folder, filename))
+            if img is not None:
+                images.append(img)
+        return images
+
     def convert_to_grayscale(self, image_list, image_path):
         for image in image_list:
-            img = cv2.imread(image_path + image)
-            grayscale_image = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+            #img = cv2.imread(image_path + image)
+            grayscale_image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
             height = 224
             width = grayscale_image.shape[1] * height / grayscale_image.shape[0]
             rounded_width = math.ceil(width)
