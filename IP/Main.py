@@ -14,6 +14,11 @@ def main():
     gray_image_set_p = ir.convert_to_grayscale(image_list_p, image_path_p)
     gray_image_set_n = ir.convert_to_grayscale(image_list_n)
 
+    def predict(score, classifier):
+        if score < classifier.theta:
+            return -classifier.sign
+        return classifier.sign
+
     haar1 = EdgeFeature(200, 200, 1)
     haar2 = EdgeFeature(200, 200, 2)
     haar3 = EdgeFeature(200, 200, 3)
