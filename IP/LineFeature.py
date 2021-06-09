@@ -28,57 +28,58 @@ class LineFeature:
     # type defined before
 
     def get_score(self, x, y, integral_im):
+        if x <= len(integral_im[0]) and y <= len(integral_im):
+            if self.type == 1:
+                l_p = (int(round((self.w)/3)) * self.h)*2
+                d_p = (self.w * self.h) - l_p
+                sum_light = (integral_im[x + int(round((self.w) / 3)), y + self.h] - integral_im[x - 1, y + self.h] -
+                             integral_im[x + int(round((self.w) / 3)), y - 1] + integral_im[x - 1, y - 1]) + (
+                                        integral_im[x + self.w, y + self.h] - integral_im[
+                                    x + int(round(((self.w) * 2) / 3)), y + self.h] - integral_im[x + self.w, y - 1] +
+                                        integral_im[x + int(round(((self.w) * 2) / 3)), y - 1])
+                sum_dark = integral_im[x + int(round((self.w) / 3)), y + self.h] - integral_im[
+                    x + int(round((self.w) / 3)), y + self.h] - integral_im[x + int(round(((self.w) * 2) / 3)), y - 1] + \
+                           integral_im[x + int(round((self.w) / 3)), y - 1]
+                return (sum_dark / d_p) - (sum_light / l_p)
 
-        if self.type == 1 :
-            l_p = (int(round((self.w)/3)) * self.h)*2
-            d_p = (self.w * self.h) - l_p
-            sum_light = (integral_im[x + int(round((self.w) / 3)), y + self.h] - integral_im[x - 1, y + self.h] -
-                         integral_im[x + int(round((self.w) / 3)), y - 1] + integral_im[x - 1, y - 1]) + (
-                                    integral_im[x + self.w, y + self.h] - integral_im[
-                                x + int(round(((self.w) * 2) / 3)), y + self.h] - integral_im[x + self.w, y - 1] +
-                                    integral_im[x + int(round(((self.w) * 2) / 3)), y - 1])
-            sum_dark = integral_im[x + int(round((self.w) / 3)), y + self.h] - integral_im[
-                x + int(round((self.w) / 3)), y + self.h] - integral_im[x + int(round(((self.w) * 2) / 3)), y - 1] + \
-                       integral_im[x + int(round((self.w) / 3)), y - 1]
-            return (sum_dark / d_p) - (sum_light / l_p)
+            elif self.type == 2:
+                d_p = (int(round((self.w) / 3)) * self.h) * 2
+                l_p = (self.w * self.h) - d_p
+                sum_dark = (integral_im[x + int(round((self.w) / 3)), y + self.h] - integral_im[x - 1, y + self.h] -
+                             integral_im[x + int(round((self.w) / 3)), y - 1] + integral_im[x - 1, y - 1]) + (
+                                        integral_im[x + self.w, y + self.h] - integral_im[
+                                    x + int(round(((self.w) * 2) / 3)), y + self.h] - integral_im[x + self.w, y - 1] +
+                                        integral_im[x + int(round(((self.w) * 2) / 3)), y - 1])
+                sum_light = integral_im[x + int(round((self.w) / 3)), y + self.h] - integral_im[
+                    x + int(round((self.w) / 3)), y + self.h] - integral_im[x + int(round(((self.w) * 2) / 3)), y - 1] + \
+                           integral_im[x + int(round((self.w) / 3)), y - 1]
+                return (sum_dark / d_p) - (sum_light / l_p)
 
-        elif self.type == 2:
-            d_p = (int(round((self.w) / 3)) * self.h) * 2
-            l_p = (self.w * self.h) - d_p
-            sum_dark = (integral_im[x + int(round((self.w) / 3)), y + self.h] - integral_im[x - 1, y + self.h] -
-                         integral_im[x + int(round((self.w) / 3)), y - 1] + integral_im[x - 1, y - 1]) + (
-                                    integral_im[x + self.w, y + self.h] - integral_im[
-                                x + int(round(((self.w) * 2) / 3)), y + self.h] - integral_im[x + self.w, y - 1] +
-                                    integral_im[x + int(round(((self.w) * 2) / 3)), y - 1])
-            sum_light = integral_im[x + int(round((self.w) / 3)), y + self.h] - integral_im[
-                x + int(round((self.w) / 3)), y + self.h] - integral_im[x + int(round(((self.w) * 2) / 3)), y - 1] + \
-                       integral_im[x + int(round((self.w) / 3)), y - 1]
-            return (sum_dark / d_p) - (sum_light / l_p)
+            elif self.type == 3:
+                l_p = (int(round((self.h) / 3)) * self.w) * 2
+                d_p = (self.w * self.h) - l_p
+                sum_light = (integral_im[x + self.w, y + int(round((self.h) / 3))] - integral_im[
+                    x - 1, y + int(round((self.h) / 3))] - integral_im[x + self.w, y - 1] + integral_im[x - 1, y - 1]) + (
+                                        integral_im[x + self.w, y + self.h] - integral_im[x - 1, y + self.h] - integral_im[
+                                    x + self.w, y + int(round(((self.h) * 2) / 3))] + integral_im[
+                                            x - 1, y + int(round(((self.h) * 2) / 3))])
+                sum_dark = integral_im[x + self.w, y + int(round(((self.h) * 2) / 3))] - integral_im[
+                    x - 1, y + int(round(((self.h) * 2) / 3))] - integral_im[x + self.w, y + int(round((self.h) / 3))] + \
+                           integral_im[x - 1, y + int(round((self.h) / 3))]
+                return (sum_dark / d_p) - (sum_light / l_p)
 
-        elif self.type == 3:
-            l_p = (int(round((self.h) / 3)) * self.w) * 2
-            d_p = (self.w * self.h) - l_p
-            sum_light = (integral_im[x + self.w, y + int(round((self.h) / 3))] - integral_im[
-                x - 1, y + int(round((self.h) / 3))] - integral_im[x + self.w, y - 1] + integral_im[x - 1, y - 1]) + (
-                                    integral_im[x + self.w, y + self.h] - integral_im[x - 1, y + self.h] - integral_im[
-                                x + self.w, y + int(round(((self.h) * 2) / 3))] + integral_im[
-                                        x - 1, y + int(round(((self.h) * 2) / 3))])
-            sum_dark = integral_im[x + self.w, y + int(round(((self.h) * 2) / 3))] - integral_im[
-                x - 1, y + int(round(((self.h) * 2) / 3))] - integral_im[x + self.w, y + int(round((self.h) / 3))] + \
-                       integral_im[x - 1, y + int(round((self.h) / 3))]
-            return (sum_dark / d_p) - (sum_light / l_p)
+            else:
+                d_p = (int(round((self.h) / 3)) * self.w) * 2
+                l_p = (self.w * self.h) - d_p
+                sum_dark = (integral_im[x + self.w, y + int(round((self.h) / 3))] - integral_im[
+                    x - 1, y + int(round((self.h) / 3))] - integral_im[x + self.w, y - 1] + integral_im[x - 1, y - 1]) + (
+                                        integral_im[x + self.w, y + self.h] - integral_im[x - 1, y + self.h] - integral_im[
+                                    x + self.w, y + int(round(((self.h) * 2) / 3))] + integral_im[
+                                            x - 1, y + int(round(((self.h) * 2) / 3))])
+                sum_light = integral_im[x + self.w, y + int(round(((self.h) * 2) / 3))] - integral_im[
+                    x - 1, y + int(round(((self.h) * 2) / 3))] - integral_im[x + self.w, y + int(round((self.h) / 3))] + \
+                           integral_im[x - 1, y + int(round((self.h) / 3))]
+                return (sum_dark / d_p) - (sum_light / l_p)
 
-        else :
-            d_p = (int(round((self.h) / 3)) * self.w) * 2
-            l_p = (self.w * self.h) - d_p
-            sum_dark = (integral_im[x + self.w, y + int(round((self.h) / 3))] - integral_im[
-                x - 1, y + int(round((self.h) / 3))] - integral_im[x + self.w, y - 1] + integral_im[x - 1, y - 1]) + (
-                                    integral_im[x + self.w, y + self.h] - integral_im[x - 1, y + self.h] - integral_im[
-                                x + self.w, y + int(round(((self.h) * 2) / 3))] + integral_im[
-                                        x - 1, y + int(round(((self.h) * 2) / 3))])
-            sum_light = integral_im[x + self.w, y + int(round(((self.h) * 2) / 3))] - integral_im[
-                x - 1, y + int(round(((self.h) * 2) / 3))] - integral_im[x + self.w, y + int(round((self.h) / 3))] + \
-                       integral_im[x - 1, y + int(round((self.h) / 3))]
-            return (sum_dark / d_p) - (sum_light / l_p)
-
-
+        else:
+            return print("Wrong size of feature")
