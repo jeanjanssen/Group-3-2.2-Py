@@ -1,6 +1,4 @@
 from ImageReader import ImageReader
-import os
-import cv2
 
 
 def main():

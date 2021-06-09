@@ -1,4 +1,4 @@
-class edgeFeature :
+class EdgeFeature:
     def __init__(self,h,w,type):
         self.h = h
         self.w = w

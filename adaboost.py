@@ -25,7 +25,6 @@ Each stump is made bt taking the previous stump's mistakes into account (therefo
 '''
 
 import numpy as np
-from haarFeatures import Haar
 
 class DecisionStump:
 

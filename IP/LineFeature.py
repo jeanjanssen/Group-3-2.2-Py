@@ -1,4 +1,4 @@
-class lineFeatures:
+class LineFeature:
 
     def __init__(self,h ,w, type):
         self.h = h
