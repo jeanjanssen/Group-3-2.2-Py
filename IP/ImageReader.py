@@ -2,6 +2,8 @@ import cv2
 import os
 import numpy as np
 from numpy.lib import math
+import os
+import glob
 
 
 class ImageReader:
@@ -14,6 +16,14 @@ class ImageReader:
             img = cv2.imread(os.path.join(folder, filename))
             if img is not None:
                 images.append(img)
+        return images
+
+    def get_positive_samples(self, path):
+        images = [cv2.imread(file) for file in glob.glob(path + "*.jpg")]
+        return images
+
+    def get_negative_samples(self, path):
+        images = [cv2.imread(file) for file in glob.glob(path + "*.jpg") ]
         return images
 
     def convert_to_grayscale(self, image_list, image_path):
