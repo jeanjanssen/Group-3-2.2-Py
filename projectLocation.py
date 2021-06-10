@@ -14,6 +14,8 @@ def generate_negative_description_file():
             f.write('Negatives/' + filename + '\n')
 
 
-#generate_negative_description_file()
+generate_negative_description_file()
 
-#print(returnLocation())
+print(returnLocation())
+
+#"C:/Users/Arthur Vieillevoye/Downloads/opencv/build/x64/vc15/bin/opencv_annotation.exe" --annotations=pos.txt --images=Positives/
