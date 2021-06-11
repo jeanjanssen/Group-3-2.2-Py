@@ -1,3 +1,6 @@
+import copy
+import sys
+
 from nltk.corpus import brown
 from sklearn.datasets import load_boston
 from sklearn import linear_model
@@ -6,13 +9,17 @@ import nltk
 # nltk.download('brown')
 import pandas as pd
 from sklearn.model_selection import train_test_split
-from sklearn.naive_bayes import MultinomialNB
+from sklearn.naive_bayes import MultinomialNB as classifier
+# from sklearn.linear_model import Perceptron as classifier
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import classification_report
 from sklearn.feature_extraction.text import CountVectorizer
 import re
+import numpy as np
 
 def main():
+
+    """
     words = []
     tags = []
 
@@ -143,36 +150,62 @@ def main():
     # print(words)
     # print(tags)
 
-    count_vect = CountVectorizer()
-
     d = {"words": words, "tags": tags}
     df = pd.DataFrame(data=d)
 
-    train, test = train_test_split(df, test_size=0.03)
+    df.to_csv("brown_relabelled.csv", index=False)
 
-    X_train, X_test, y_train, y_test = train.words, test.words, train.tags, test.tags
+    """
 
-    input = "i eat bread"
+    df = pd.read_csv("brown_relabelled.csv")
+
+    count_vect = CountVectorizer()
+
+    #df_rest, df = train_test_split(df, test_size=0.1)
+
+    train, test = train_test_split(df, test_size=0.001)
+
+    X_train, X_test, y_train, y_test = df.words, test.words, df.tags, test.tags
+
+    # print(X_train)
+
+    input = "add appointment on tuesday next week"
+    output = "V N P N P N"
     X_test = pd.core.series.Series(input.split(" "))
-    # y_test = pd.core.series.Series(["D", "N", "V", "A", "N"])
+    y_test = pd.core.series.Series(output.split(" "))
 
-    X_train_counts = count_vect.fit_transform(X_train)
-    X_test_counts = count_vect.transform(X_test)
+    X_train_counts = count_vect.fit_transform(X_train.values.astype('U'))
+    # X_test_counts = count_vect.transform(X_test.values.astype('U'))
 
-    print(X_train_counts.shape)
-    print(y_train.shape)
-    print(X_test_counts.shape)
-    print(y_test.shape)
-
-    clf = MultinomialNB()
+    # print(X_train_counts.shape)
+    # print(y_train.shape)
+    # print(X_test_counts.shape)
+    # print(y_test.shape)
+    print(10)
+    clf = classifier()
     # clf = LogisticRegression(max_iter=1000)
     clf.fit(X_train_counts, y_train)
-    y_predict = clf.predict(X_test_counts)
+    print(20)
+    # occ, freq = letter_training(X_train, y_train, clf.classes_)
+    # occ.to_csv("letter_occurrence", index=False)
+    # freq.to_csv("letter_frequency.csv", index=False)
 
-    # print(classification_report(y_test, y_predict, zero_division=0))
+    # occ = pd.read_csv("letter_occurrence")
+    # freq = pd.read_csv("letter_frequency.csv")
+    occ = pd.read_csv("occurrence.csv")
+    freq = pd.read_csv("frequency.csv")
+    y_predict = []
+    for word in X_test:
+        # y_predict.append(letter_predict(word, occ, freq, clf.classes_))
+        y_predict.append(word_predict(word, occ, freq, clf.classes_))
+
+    # y_predict = clf.predict(X_test_counts)
+
+    y_predict = np.array(y_predict)
+    print(classification_report(y_test, y_predict, zero_division=0))
 
     print(list(X_test))
-    # print(list(y_test))
+    print(list(y_test))
     print(list(y_predict))
 
     # code = m2c.export_to_java(clf)
@@ -187,6 +220,233 @@ def main():
 
     code = m2c.export_to_java(estimator)
     """
+
+def word_predict(word, occ, freq, classes):
+    # Calculate prior probabilities
+    prior = np.zeros(len(classes))
+    for i in range(0, len(classes)):
+        prior[i] = sum(freq[classes[i]])
+    amount_of_items = sum(prior)
+    for i in range(0, len(prior)):
+        prior[i] = prior[i] / amount_of_items
+
+    # prior = np.ones(len(classes))
+
+    if not word in list(occ["WORD"]):
+        prior  = prior *  (1 / len(classes))
+    else:
+        index = list(occ["WORD"]).index(word)
+        for i in range(0, len(classes)):
+            prior[i] = prior[i] * occ[classes[i]][index]
+
+    best_prob = 0
+    best_class = 0
+    for i in range(0, len(prior)):
+        if prior[i] > best_prob:
+            best_prob = prior[i]
+            best_class = i
+
+    return classes[best_class]
+
+def letter_predict(word, occ, freq, classes):
+
+    # Calculate prior probabilities
+    prior = np.zeros(len(classes))
+    for i in range(0, len(classes)):
+        prior[i] = sum(freq[classes[i]])
+    amount_of_items = sum(prior)
+    for i in range(0, len(prior)):
+        prior[i] = prior[i] / amount_of_items
+
+    # prior = np.ones(len(classes))
+
+    for character in word:
+        if not character in list(occ["CHARACTERS"]):
+            prior = prior * (1 / len(classes))
+        else:
+            index = list(occ["CHARACTERS"]).index(character)
+            for i in range(0, len(classes)):
+                prior[i] = prior[i] * occ[classes[i]][index]
+    """
+    character = word[0]
+    if not character in list(occ["CHARACTERS"]):
+        prior = prior * (1 / len(classes))
+    else:
+        index = list(occ["CHARACTERS"]).index(character)
+        for i in range(0, len(classes)):
+            prior[i] = prior[i] * occ[classes[i]][index]
+    character = word[-1]
+    if not character in list(occ["CHARACTERS"]):
+        prior = prior * (1 / len(classes))
+    else:
+        index = list(occ["CHARACTERS"]).index(character)
+        for i in range(0, len(classes)):
+            prior[i] = prior[i] * occ[classes[i]][index]
+    """
+
+    best_prob = 0
+    best_class = 0
+    for i in range(0, len(prior)):
+        if prior[i] > best_prob:
+            best_prob = prior[i]
+            best_class = i
+
+    # print(word)
+    # print(classes[best_class])
+    # print()
+    return classes[best_class]
+
+
+
+def unigram_training(X, y, classes):
+    # print("je moeder")
+
+    X = list(X)
+    y = list(y)
+
+    d1 = {}
+    d1["A"] = {}
+    d1["B"] = {}
+    # print(d1)
+    d1["A"]["the"] = 1
+    if "the" in d1["A"]:
+        d1["A"]["the"] += 1
+    else:
+        d1["A"]["the"] = 1
+    # print(d1)
+
+    tokens_per_classes = {}
+    for c in classes:
+        tokens_per_classes[c] = {}
+
+    vocabulary = []
+
+    # print(tokens_per_classes)
+
+    for i in range(0, len(X)):
+        if not X[i] in vocabulary:
+            vocabulary.append(X[i])
+        if X[i] in tokens_per_classes[y[i]]:
+            tokens_per_classes[y[i]][X[i]] += 1
+        else:
+            tokens_per_classes[y[i]][X[i]] = 1
+
+    # print(tokens_per_classes)
+    # print(vocabulary)
+
+    CLASSES = {}
+    TOTAL = []
+
+    for c in classes:
+        CLASSES[c] = {c: []}
+
+    # print(CLASSES)
+
+    for word in vocabulary:
+        totalCount = 0
+        for c in classes:
+            if word in tokens_per_classes[c]:
+                CLASSES[c][c].append(tokens_per_classes[c][word])
+                totalCount += tokens_per_classes[c][word]
+            else:
+                CLASSES[c][c].append(0)
+        TOTAL.append(totalCount)
+
+    LISTS = {}
+    LISTS["WORD"] = vocabulary
+    for c in classes:
+        LISTS[c] = CLASSES[c][c]
+    LISTS["TOTAL"] = TOTAL
+
+    LISTS_OCCURENCE = copy.deepcopy(LISTS)
+
+    for c in classes:
+        for i in range(0, len(LISTS_OCCURENCE["TOTAL"])):
+            LISTS_OCCURENCE[c][i] = LISTS_OCCURENCE[c][i] / LISTS_OCCURENCE["TOTAL"][i]
+
+    trained_df_frequency = pd.DataFrame(data=LISTS)
+    trained_df_occurence = pd.DataFrame(data=LISTS_OCCURENCE)
+    # print(trained_df_frequency)
+    # print((trained_df_occurence))
+
+    return trained_df_occurence, trained_df_frequency
+    
+def letter_training(X, y, classes):
+    print("je moeder")
+
+    X = list(X)
+    y = list(y)
+
+    d1 = {}
+    d1["A"] = {}
+    d1["B"] = {}
+    # print(d1)
+    d1["A"]["the"] = 1
+    if "the" in d1["A"]:
+        d1["A"]["the"] += 1
+    else:
+        d1["A"]["the"] = 1
+    # print(d1)
+
+    tokens_per_classes = {}
+    for c in classes:
+        tokens_per_classes[c] = {}
+
+    vocabulary = []
+
+    print(tokens_per_classes)
+
+    for i in range(0, len(X)):
+        for l in str(X[i]):
+            if not l in vocabulary:
+                vocabulary.append(l)
+            if l in tokens_per_classes[y[i]]:
+                tokens_per_classes[y[i]][l] += 1
+            else:
+                tokens_per_classes[y[i]][l] = 1
+
+    # print(tokens_per_classes)
+    print(vocabulary)
+
+    CLASSES = {}
+    TOTAL = []
+
+    for c in classes:
+        CLASSES[c] = {c: []}
+
+    print(CLASSES)
+
+    for character in vocabulary:
+        totalCount = 0
+        for c in classes:
+            if character in tokens_per_classes[c]:
+                CLASSES[c][c].append(tokens_per_classes[c][character])
+                totalCount += tokens_per_classes[c][character]
+            else:
+                CLASSES[c][c].append(0)
+        TOTAL.append(totalCount)
+
+    LISTS = {}
+    LISTS["CHARACTERS"] = vocabulary
+    for c in classes:
+        LISTS[c] = CLASSES[c][c]
+    LISTS["TOTAL"] = TOTAL
+
+    LISTS_OCCURENCE = copy.deepcopy(LISTS)
+
+    for c in classes:
+        for i in range(0, len(LISTS_OCCURENCE["TOTAL"])):
+            LISTS_OCCURENCE[c][i] = LISTS_OCCURENCE[c][i] / LISTS_OCCURENCE["TOTAL"][i]
+
+    trained_df_frequency = pd.DataFrame(data=LISTS)
+    trained_df_occurence = pd.DataFrame(data=LISTS_OCCURENCE)
+    # print(trained_df_frequency)
+    # print((trained_df_occurence))
+    return trained_df_occurence, trained_df_frequency
+
+
+
+
 
 if __name__ == "__main__":
     main()
