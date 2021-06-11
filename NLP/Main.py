@@ -13,6 +13,7 @@ from sklearn.naive_bayes import MultinomialNB as classifier
 # from sklearn.linear_model import Perceptron as classifier
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import classification_report
+from sklearn.metrics import accuracy_score
 from sklearn.feature_extraction.text import CountVectorizer
 import re
 import numpy as np
@@ -31,6 +32,10 @@ def main():
         # Remove negation (*)
         tag.replace("*", "")
         tag.replace("$", "Y")
+
+        if word == "i" and (re.match(r"N[A-Z]*", tag) or re.match(r"P[A-Z]*", tag)):
+            print(word)
+            print(tag)
 
         # Remove hyphenations and prefixes
         if "+" in tag:
@@ -137,8 +142,8 @@ def main():
             words.append(word)
             tags.append("D")
         # Wh- pronoun --> PROnoun
-        # WP[A-Z]*[$]* --> PRO
-        elif re.match(r"WP[A-Z]*[$]*", tag):
+        # WP[A-Z]* --> PRO
+        elif re.match(r"WP[A-Z]*", tag):
             words.append(word)
             tags.append("PRO")
         # Wh- adverb --> ADVerb
@@ -156,7 +161,7 @@ def main():
     df.to_csv("brown_relabelled.csv", index=False)
 
     """
-
+    
     df = pd.read_csv("brown_relabelled.csv")
 
     count_vect = CountVectorizer()
@@ -169,10 +174,24 @@ def main():
 
     # print(X_train)
 
-    input = "add appointment on tuesday next week"
-    output = "V N P N P N"
+    input = "i"
+    output = "PRO"
     X_test = pd.core.series.Series(input.split(" "))
     y_test = pd.core.series.Series(output.split(" "))
+
+
+    remove_ids = []
+    for i in y_test.keys():
+        if y_test[i] == 'N':
+            remove_ids.append(i)
+
+    print(remove_ids)
+    print(type(X_test))
+
+    X_test = X_test.drop(remove_ids)
+    y_test = y_test.drop(remove_ids)
+
+    print(X_test)
 
     X_train_counts = count_vect.fit_transform(X_train.values.astype('U'))
     # X_test_counts = count_vect.transform(X_test.values.astype('U'))
@@ -190,6 +209,11 @@ def main():
     # occ.to_csv("letter_occurrence", index=False)
     # freq.to_csv("letter_frequency.csv", index=False)
 
+    weights = {}
+    for c in clf.classes_:
+        weights[c] = 1
+    # weights["N"] = 0.5
+
     # occ = pd.read_csv("letter_occurrence")
     # freq = pd.read_csv("letter_frequency.csv")
     occ = pd.read_csv("occurrence.csv")
@@ -197,20 +221,21 @@ def main():
     y_predict = []
     for word in X_test:
         # y_predict.append(letter_predict(word, occ, freq, clf.classes_))
-        y_predict.append(word_predict(word, occ, freq, clf.classes_))
+        y_predict.append(word_predict(word, occ, freq, clf.classes_, weights))
 
     # y_predict = clf.predict(X_test_counts)
 
     y_predict = np.array(y_predict)
-    print(classification_report(y_test, y_predict, zero_division=0))
+    print(accuracy_score(y_test, y_predict))
 
-    print(list(X_test))
-    print(list(y_test))
-    print(list(y_predict))
+    # print(list(X_test))
+    # print(list(y_test))
+    # print(list(y_predict))
 
     # code = m2c.export_to_java(clf)
     # print(code)
 
+    #"""
     """
     boston = load_boston()
     X, y = boston.data, boston.target
@@ -221,7 +246,7 @@ def main():
     code = m2c.export_to_java(estimator)
     """
 
-def word_predict(word, occ, freq, classes):
+def word_predict(word, occ, freq, classes, weights):
     # Calculate prior probabilities
     prior = np.zeros(len(classes))
     for i in range(0, len(classes)):
@@ -237,7 +262,7 @@ def word_predict(word, occ, freq, classes):
     else:
         index = list(occ["WORD"]).index(word)
         for i in range(0, len(classes)):
-            prior[i] = prior[i] * occ[classes[i]][index]
+            prior[i] = prior[i] * occ[classes[i]][index] * weights[classes[i]]
 
     best_prob = 0
     best_class = 0
