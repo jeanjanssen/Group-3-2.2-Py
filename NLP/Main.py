@@ -1,4 +1,5 @@
 import copy
+import random
 import sys
 
 from nltk.corpus import brown
@@ -17,6 +18,9 @@ from sklearn.metrics import accuracy_score
 from sklearn.feature_extraction.text import CountVectorizer
 import re
 import numpy as np
+from nltk import ngrams
+from nltk import bigrams, trigrams
+from collections import Counter, defaultdict
 
 def main():
 
@@ -164,89 +168,170 @@ def main():
     
     df = pd.read_csv("brown_relabelled.csv")
 
+
+    """
+    # N_GRAM TRAINING
+    N_ngram = 8
+    n_grams = []
+    vocs_freq = []
+    vocs_occ = []
+    counts = []
+    for n in range(1, N_ngram + 1):
+        counts.append(0)
+        n_grams.append(list(ngrams(df["words"], n)))
+        voc = {}
+        for n_gram in n_grams[n-1]:
+            counts[n-1] += 1
+            if n_gram in voc:
+                voc[n_gram] += 1
+            else:
+                voc[n_gram] = 1
+        vocs_freq.append(voc)
+    vocs_occ = copy.deepcopy(vocs_freq)
+    for i in range(0, len(vocs_occ)):
+        for key in vocs_occ[i].keys():
+            vocs_occ[i][key] = vocs_occ[i][key] / counts[i]
+
+    # N_GRAM PREDICTION
+    for start in random_a_dict_and_sample_it(vocs_occ[0], min(len(vocs_occ[0]), 1)).keys():
+        previous_words_string = start[0]
+        previous_words_list = previous_words_string.split(" ")
+        new_words_count = 8
+        for new_word in range(0, new_words_count):
+            words_list = []
+            if len(previous_words_list) > N_ngram - 1:
+                words_list = previous_words_list[-(N_ngram - 1):]
+            else:
+                words_list = previous_words_list.copy()
+            n_gram_probabilities = {}
+            lamb = 1 / len(words_list)
+            best = 0.0
+            for tag in vocs_freq[0].keys():
+                print(" " + str(words_list))
+                for i in range(1, len(words_list) + 2):
+                    randoms = [random.randint(2, len(words_list) + 2), random.randint(2, len(words_list) + 2), random.randint(2, len(words_list) + 2)]
+                    search = ()
+                    if i == 1:
+                        search = tuple([tag[0]])
+                        print(search)
+                        n_gram_probabilities[tag[0]] = lamb * 0 #vocs_occ[i-1][search]
+                    elif i in randoms:
+                        search_list = words_list[-(i - 1):]
+                        search_list.append(tag[0])
+                        search = tuple(search_list)
+                        print(search)
+                        if search in vocs_occ[i - 1]:
+                            n_gram_probabilities[tag[0]] += lamb * vocs_occ[i - 1][search]
+                        else:
+                            n_gram_probabilities[tag[0]] += lamb * 1 / counts[i - 1]
+                    else:
+                        search_list = words_list[-(i - 1):]
+                        search_list.append(tag[0])
+                        search = tuple(search_list)
+                        print(search)
+                        if search in vocs_occ[i - 1]:
+                            n_gram_probabilities[tag[0]] += lamb * 1 / counts[i - 1] #vocs_occ[i - 1][search]
+                        else:
+                            n_gram_probabilities[tag[0]] += lamb * 1 / counts[i - 1]
+                if n_gram_probabilities[tag[0]] > best:
+                    # print("P(" + str(tag[0]) + ") = " + str(n_gram_probabilities[tag[0]]))
+                    best = n_gram_probabilities[tag[0]]
+            # print(n_gram_probabilities)
+            # print(argmax_class_dict(n_gram_probabilities))
+            previous_words_list.append(argmax_class_dict(n_gram_probabilities))
+            # print("Appended " + str(argmax_class_dict(n_gram_probabilities)))
+        print()
+        print(previous_words_list)
+    """
+
+    # Create a placeholder for model
+    model = defaultdict(lambda: defaultdict(lambda: 0))
+
+    # print(df)
+
+    # Count frequency of co-occurance
+    for w1, w2, w3 in trigrams(df.index, pad_right=True, pad_left=True):
+        if(type(w1) == type(int("0")) and type(w2) == type(int("0")) and type(w3) == type(int("0"))):
+            model[(df["words"][w1], df["words"][w2])][df["words"][w3]] += 1
+
+    # Let's transform the counts to probabilities
+    for w1_w2 in model:
+        total_count = float(sum(model[w1_w2].values()))
+        for w3 in model[w1_w2]:
+            model[w1_w2][w3] /= total_count
+
+    # starting words
+    text = ["i", "eat"]
+    sentence_finished = False
+
+    max = 10
+    current = 1
+    while not sentence_finished:
+        # select a random probability threshold
+        r = random.random() * 0.2 + 0.8
+        best = .0
+        accumulator = .0
+        best_word = ""
+
+        for word in model[tuple(text[-2:])].keys():
+            # print(accumulator)
+            accumulator = model[tuple(text[-2:])][word]
+            # select words that are above the probability threshold
+            if accumulator > best:
+                best_word = word
+                best = accumulator
+                # text.append(word)
+                #break
+        text.append(best_word)
+
+        if text[-2:] == [None, None] or current >= max:
+            sentence_finished = True
+        current += 1
+
+    print(' '.join([str(t) for t in text if t]))
+
+
+
     count_vect = CountVectorizer()
 
-    #df_rest, df = train_test_split(df, test_size=0.1)
+    # df_rest, df = train_test_split(df, test_size=0.1)
 
-    train, test = train_test_split(df, test_size=0.001)
+    train, test = train_test_split(df, test_size=0.1)
 
     X_train, X_test, y_train, y_test = df.words, test.words, df.tags, test.tags
 
-    # print(X_train)
-
-    input = "i"
-    output = "PRO"
-    X_test = pd.core.series.Series(input.split(" "))
-    y_test = pd.core.series.Series(output.split(" "))
-
-
-    remove_ids = []
-    for i in y_test.keys():
-        if y_test[i] == 'N':
-            remove_ids.append(i)
-
-    print(remove_ids)
-    print(type(X_test))
-
-    X_test = X_test.drop(remove_ids)
-    y_test = y_test.drop(remove_ids)
-
-    print(X_test)
+    # input = "i"
+    # output = "PRO"
+    # X_test = pd.core.series.Series(input.split(" "))
+    # y_test = pd.core.series.Series(output.split(" "))
 
     X_train_counts = count_vect.fit_transform(X_train.values.astype('U'))
-    # X_test_counts = count_vect.transform(X_test.values.astype('U'))
+    X_test_counts = count_vect.transform(X_test.values.astype('U'))
 
-    # print(X_train_counts.shape)
-    # print(y_train.shape)
-    # print(X_test_counts.shape)
-    # print(y_test.shape)
-    print(10)
     clf = classifier()
     # clf = LogisticRegression(max_iter=1000)
     clf.fit(X_train_counts, y_train)
-    print(20)
+    y_predict = clf.predict(X_test_counts)
+
     # occ, freq = letter_training(X_train, y_train, clf.classes_)
     # occ.to_csv("letter_occurrence", index=False)
     # freq.to_csv("letter_frequency.csv", index=False)
 
-    weights = {}
-    for c in clf.classes_:
-        weights[c] = 1
-    # weights["N"] = 0.5
-
     # occ = pd.read_csv("letter_occurrence")
     # freq = pd.read_csv("letter_frequency.csv")
-    occ = pd.read_csv("occurrence.csv")
-    freq = pd.read_csv("frequency.csv")
-    y_predict = []
-    for word in X_test:
-        # y_predict.append(letter_predict(word, occ, freq, clf.classes_))
-        y_predict.append(word_predict(word, occ, freq, clf.classes_, weights))
+    # occ = pd.read_csv("occurrence.csv")
+    # freq = pd.read_csv("frequency.csv")
+    # y_predict = []
+    # for word in X_test:
+    #     # y_predict.append(letter_predict(word, occ, freq, clf.classes_))
+    #     y_predict.append(word_predict(word, occ, freq, clf.classes_))
+    # y_predict = np.array(y_predict)
 
-    # y_predict = clf.predict(X_test_counts)
-
-    y_predict = np.array(y_predict)
-    print(accuracy_score(y_test, y_predict))
-
-    # print(list(X_test))
-    # print(list(y_test))
-    # print(list(y_predict))
-
-    # code = m2c.export_to_java(clf)
-    # print(code)
+    print(classification_report(y_test, y_predict))
 
     #"""
-    """
-    boston = load_boston()
-    X, y = boston.data, boston.target
 
-    estimator = linear_model.LinearRegression()
-    estimator.fit(X, y)
-
-    code = m2c.export_to_java(estimator)
-    """
-
-def word_predict(word, occ, freq, classes, weights):
+def word_predict(word, occ, freq, classes):
     # Calculate prior probabilities
     prior = np.zeros(len(classes))
     for i in range(0, len(classes)):
@@ -262,16 +347,10 @@ def word_predict(word, occ, freq, classes, weights):
     else:
         index = list(occ["WORD"]).index(word)
         for i in range(0, len(classes)):
-            prior[i] = prior[i] * occ[classes[i]][index] * weights[classes[i]]
+            prior[i] = prior[i] * occ[classes[i]][index]
 
-    best_prob = 0
-    best_class = 0
-    for i in range(0, len(prior)):
-        if prior[i] > best_prob:
-            best_prob = prior[i]
-            best_class = i
 
-    return classes[best_class]
+    return classes[argmax_class(prior)]
 
 def letter_predict(word, occ, freq, classes):
 
@@ -309,17 +388,12 @@ def letter_predict(word, occ, freq, classes):
             prior[i] = prior[i] * occ[classes[i]][index]
     """
 
-    best_prob = 0
-    best_class = 0
-    for i in range(0, len(prior)):
-        if prior[i] > best_prob:
-            best_prob = prior[i]
-            best_class = i
+
 
     # print(word)
     # print(classes[best_class])
     # print()
-    return classes[best_class]
+    return classes[argmax_class(prior)]
 
 
 
@@ -470,7 +544,29 @@ def letter_training(X, y, classes):
     return trained_df_occurence, trained_df_frequency
 
 
+def argmax_class(probs):
+    best_prob = 0
+    best_class = 0
+    for i in range(0, len(probs)):
+        if probs[i] > best_prob:
+            best_prob = probs[i]
+            best_class = i
+    return best_class
 
+def argmax_class_dict(probs):
+    best_prob = 0
+    best_class = ""
+    for key in dict(probs).keys():
+        if probs[key] > best_prob:
+            best_prob = probs[key]
+            best_class = key
+    return best_class
+
+def random_a_dict_and_sample_it( a_dictionary , a_number ):
+    _ = {}
+    for k1 in random.sample( list( a_dictionary.keys() ) , a_number ):
+        _[ k1 ] = a_dictionary[ k1 ]
+    return _
 
 
 if __name__ == "__main__":
