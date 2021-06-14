@@ -27,8 +27,8 @@ def main():
     #Preparing the training samples
 
     ir = ImageReader()
-    image_path_n = 'C:\\Users\\Kaci\\Documents\\Group-3-face-recognition\\Negatives\\'
-    image_path_p = 'C:\\Users\\Kaci\\Documents\\Group-3-face-recognition\\Positives\\'
+    image_path_n = 'C:\\Users\\Kaci\\Documents\\Group-3-face-recognition\\TNegatives\\'
+    image_path_p = 'C:\\Users\\Kaci\\Documents\\Group-3-face-recognition\\TPositives\\'
 
     #image_list_n = ir.load_images_from_folder(image_path_n)
     #image_list_p = ir.load_images_from_folder(image_path_p)

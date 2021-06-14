@@ -7,7 +7,10 @@ import sys
 # imagePath = sys.argv[1]
 cascPath = "haarcascade_frontalface_alt.xml"
 true_positives = 0
+false_positives = 0
+true_negatives = 0
 false_negatives = 0
+filename_list = []
 
 # This creates the cascade classification from file
 faceCascade = cv2.CascadeClassifier(cascPath)
@@ -20,6 +23,7 @@ faceCascade = cv2.CascadeClassifier(cascPath)
 def load_images_from_folder(folder):
     images = []
     for filename in os.listdir(folder):
+        filename_list.append(filename)
         img = cv2.imread(os.path.join(folder, filename))
         if img is not None:
             images.append(img)
@@ -42,18 +46,38 @@ for i in range(len(image_list)):
         minSize=(1, 1),
         flags=cv2.CASCADE_SCALE_IMAGE
     )
-    print("Detected {0} faces!".format(len(faces)))
-    if len(faces) > 0:
-        true_positives = true_positives + 1
+    # print("Detected {0} faces!".format(len(faces)))
+    fpos = open(os.getcwd() + '\\tpos.txt', 'r')
+    content_pos = fpos.readlines()
+    fpos.close()
+    fneg = open(os.getcwd() + '\\tneg.txt', 'r')
+    content_neg = fneg.readlines()
+    fneg.close()
+    if len(faces) >= 1:
+        if filename_list[i] + '\n' in content_pos:
+            true_positives += 1
+        else:
+            false_positives += 1
     else:
-        false_negatives = false_negatives + 1
+        if filename_list[i] + '\n' in content_neg:
+            true_negatives += 1
+        else:
+            false_negatives += 1
 
 # This draws a green rectangle around the faces detected
-for (x, y, w, h) in faces:
-    cv2.rectangle(image, (x, y), (x + w, y + h), (0, 255, 0), 2)
+# for (x, y, w, h) in faces:
+#    cv2.rectangle(image, (x, y), (x + w, y + h), (0, 255, 0), 2)
 
-#cv2.imshow("Faces Detected", image)
-#cv2.waitKey(0)
+# cv2.imshow("Faces Detected", image)
+p = true_positives + false_negatives
+n = true_negatives + false_positives
+accuracy = (true_positives + true_negatives) / (true_positives + false_positives + false_negatives + true_negatives)
+recall = true_positives / (true_positives + false_negatives)
+precision = true_positives / (true_positives + false_positives)
+b = 1
+f_score = ((b**2 + 1) * precision * recall) / ((b**2 * precision) + recall)
 
-print(true_positives)
-print(false_negatives)
+print("Accuracy: ", accuracy)
+print("Recall: ", recall)
+print("Precision: ", precision)
+print("F-score: ", f_score)
