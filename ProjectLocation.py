@@ -8,18 +8,18 @@ def returnLocation():
 def generate_negative_description_file(path_argument):
     path = returnLocation()
     path = path + path_argument
-    with open('neg.txt', 'w') as f:
+    with open('AccuracyTest/tneg.txt', 'w') as f:
         # loop over all the filenames
         for filename in os.listdir(path):
-            f.write('Negatives/' + filename + '\n')
+            f.write(filename + '\n')
 
 
-generate_negative_description_file("\\Negatives")
+generate_negative_description_file("\AccuracyTest\TestImages")
 
 print(returnLocation())
 
 # To create the positive images
-#"C:/Users/Arthur Vieillevoye/Downloads/opencv/build/x64/vc15/bin/opencv_annotation.exe" --annotations=pos.txt --images=Positives/
+#"C:/Users/Arthur Vieillevoye/Downloads/opencv/build/x64/vc15/bin/opencv_annotation.exe" --annotations=pos.txt --images=TPositives/
 
 #To sample in the positive images:
 #"C:/Users/Arthur Vieillevoye/Downloads/opencv/build/x64/vc15/bin/opencv_createsamples.exe" -info pos.txt -w 24 -h 24 -num 1000 -vec pos.vec
