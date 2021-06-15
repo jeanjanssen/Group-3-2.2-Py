@@ -18,11 +18,16 @@ from sklearn.metrics import accuracy_score
 from sklearn.feature_extraction.text import CountVectorizer
 import re
 import numpy as np
+import random
 from nltk import ngrams
 from nltk import bigrams, trigrams
 from collections import Counter, defaultdict
+from Main2 import printList
 
 def main():
+
+    for i in range(0, 30):
+        print(printList(brown.sents()[random.randint(0, len(brown.sents()))]))
 
     """
     words = []
@@ -166,7 +171,7 @@ def main():
 
     """
     
-    df = pd.read_csv("brown_relabelled.csv")
+   #  df = pd.read_csv("brown_relabelled.csv")
 
 
     """
@@ -244,6 +249,7 @@ def main():
         print(previous_words_list)
     """
 
+    """
     # Create a placeholder for model
     model = defaultdict(lambda: defaultdict(lambda: 0))
 
@@ -327,7 +333,7 @@ def main():
 
     print(classification_report(y_test, y_predict))
 
-    #"""
+    """
 
 def word_predict(word, occ, freq, classes):
     # Calculate prior probabilities
