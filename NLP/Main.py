@@ -247,8 +247,6 @@ def main():
     # Create a placeholder for model
     model = defaultdict(lambda: defaultdict(lambda: 0))
 
-    # print(df)
-
     # Count frequency of co-occurance
     for w1, w2, w3 in trigrams(df.index, pad_right=True, pad_left=True):
         if(type(w1) == type(int("0")) and type(w2) == type(int("0")) and type(w3) == type(int("0"))):
