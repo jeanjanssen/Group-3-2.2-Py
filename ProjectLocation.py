@@ -14,7 +14,7 @@ def generate_negative_description_file(path_argument):
             f.write(filename + '\n')
 
 
-generate_negative_description_file("\AccuracyTest\TestImages")
+generate_negative_description_file("\AccuracyTest\TNeg")
 
 print(returnLocation())
 
