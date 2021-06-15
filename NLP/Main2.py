@@ -1,4 +1,5 @@
 import random
+import re
 from collections import defaultdict
 
 import pandas as pd
@@ -6,6 +7,21 @@ from nltk import trigrams, bigrams
 
 
 def main():
+    file = open("sentences_corrected.txt", "r+")
+    direct_read = file.readlines()
+    file.close()
+
+    sentences = []
+    for s in direct_read:
+        if re.match(r"[0-9].*", s):
+            sentences.append(s)
+    random.shuffle(sentences)
+
+    file = open("shuffled_sentences.txt", "w+")
+    file.writelines(sentences)
+    file.close()
+
+    """
     df = pd.read_csv("brown_relabelled.csv")
     BIGRAM = []
     TRIGRAM = []
@@ -43,6 +59,7 @@ def main():
     file = open("sentences.txt", "w+")
     file.writelines(master_list)
     file.close()
+    """
 
 
 def bi_tri_gramPredictor(input, mode, df, max, use_weights):
