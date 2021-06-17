@@ -22,12 +22,11 @@ import random
 from nltk import ngrams
 from nltk import bigrams, trigrams
 from collections import Counter, defaultdict
-from Main2 import printList
 
 def main():
 
-    for i in range(0, 30):
-        print(printList(brown.sents()[random.randint(0, len(brown.sents()))]))
+    # for i in range(0, 30):
+        # print(printList(brown.sents()[random.randint(0, len(brown.sents()))]))
 
     """
     words = []
@@ -171,130 +170,7 @@ def main():
 
     """
     
-   #  df = pd.read_csv("brown_relabelled.csv")
-
-
-    """
-    # N_GRAM TRAINING
-    N_ngram = 8
-    n_grams = []
-    vocs_freq = []
-    vocs_occ = []
-    counts = []
-    for n in range(1, N_ngram + 1):
-        counts.append(0)
-        n_grams.append(list(ngrams(df["words"], n)))
-        voc = {}
-        for n_gram in n_grams[n-1]:
-            counts[n-1] += 1
-            if n_gram in voc:
-                voc[n_gram] += 1
-            else:
-                voc[n_gram] = 1
-        vocs_freq.append(voc)
-    vocs_occ = copy.deepcopy(vocs_freq)
-    for i in range(0, len(vocs_occ)):
-        for key in vocs_occ[i].keys():
-            vocs_occ[i][key] = vocs_occ[i][key] / counts[i]
-
-    # N_GRAM PREDICTION
-    for start in random_a_dict_and_sample_it(vocs_occ[0], min(len(vocs_occ[0]), 1)).keys():
-        previous_words_string = start[0]
-        previous_words_list = previous_words_string.split(" ")
-        new_words_count = 8
-        for new_word in range(0, new_words_count):
-            words_list = []
-            if len(previous_words_list) > N_ngram - 1:
-                words_list = previous_words_list[-(N_ngram - 1):]
-            else:
-                words_list = previous_words_list.copy()
-            n_gram_probabilities = {}
-            lamb = 1 / len(words_list)
-            best = 0.0
-            for tag in vocs_freq[0].keys():
-                print(" " + str(words_list))
-                for i in range(1, len(words_list) + 2):
-                    randoms = [random.randint(2, len(words_list) + 2), random.randint(2, len(words_list) + 2), random.randint(2, len(words_list) + 2)]
-                    search = ()
-                    if i == 1:
-                        search = tuple([tag[0]])
-                        print(search)
-                        n_gram_probabilities[tag[0]] = lamb * 0 #vocs_occ[i-1][search]
-                    elif i in randoms:
-                        search_list = words_list[-(i - 1):]
-                        search_list.append(tag[0])
-                        search = tuple(search_list)
-                        print(search)
-                        if search in vocs_occ[i - 1]:
-                            n_gram_probabilities[tag[0]] += lamb * vocs_occ[i - 1][search]
-                        else:
-                            n_gram_probabilities[tag[0]] += lamb * 1 / counts[i - 1]
-                    else:
-                        search_list = words_list[-(i - 1):]
-                        search_list.append(tag[0])
-                        search = tuple(search_list)
-                        print(search)
-                        if search in vocs_occ[i - 1]:
-                            n_gram_probabilities[tag[0]] += lamb * 1 / counts[i - 1] #vocs_occ[i - 1][search]
-                        else:
-                            n_gram_probabilities[tag[0]] += lamb * 1 / counts[i - 1]
-                if n_gram_probabilities[tag[0]] > best:
-                    # print("P(" + str(tag[0]) + ") = " + str(n_gram_probabilities[tag[0]]))
-                    best = n_gram_probabilities[tag[0]]
-            # print(n_gram_probabilities)
-            # print(argmax_class_dict(n_gram_probabilities))
-            previous_words_list.append(argmax_class_dict(n_gram_probabilities))
-            # print("Appended " + str(argmax_class_dict(n_gram_probabilities)))
-        print()
-        print(previous_words_list)
-    """
-
-    """
-    # Create a placeholder for model
-    model = defaultdict(lambda: defaultdict(lambda: 0))
-
-    # Count frequency of co-occurance
-    for w1, w2, w3 in trigrams(df.index, pad_right=True, pad_left=True):
-        if(type(w1) == type(int("0")) and type(w2) == type(int("0")) and type(w3) == type(int("0"))):
-            model[(df["words"][w1], df["words"][w2])][df["words"][w3]] += 1
-
-    # Let's transform the counts to probabilities
-    for w1_w2 in model:
-        total_count = float(sum(model[w1_w2].values()))
-        for w3 in model[w1_w2]:
-            model[w1_w2][w3] /= total_count
-
-    # starting words
-    text = ["i", "eat"]
-    sentence_finished = False
-
-    max = 10
-    current = 1
-    while not sentence_finished:
-        # select a random probability threshold
-        r = random.random() * 0.2 + 0.8
-        best = .0
-        accumulator = .0
-        best_word = ""
-
-        for word in model[tuple(text[-2:])].keys():
-            # print(accumulator)
-            accumulator = model[tuple(text[-2:])][word]
-            # select words that are above the probability threshold
-            if accumulator > best:
-                best_word = word
-                best = accumulator
-                # text.append(word)
-                #break
-        text.append(best_word)
-
-        if text[-2:] == [None, None] or current >= max:
-            sentence_finished = True
-        current += 1
-
-    print(' '.join([str(t) for t in text if t]))
-
-
+    df = pd.read_csv("brown_relabelled.csv")
 
     count_vect = CountVectorizer()
 
@@ -333,7 +209,7 @@ def main():
 
     print(classification_report(y_test, y_predict))
 
-    """
+
 
 def word_predict(word, occ, freq, classes):
     # Calculate prior probabilities
@@ -352,7 +228,6 @@ def word_predict(word, occ, freq, classes):
         index = list(occ["WORD"]).index(word)
         for i in range(0, len(classes)):
             prior[i] = prior[i] * occ[classes[i]][index]
-
 
     return classes[argmax_class(prior)]
 
