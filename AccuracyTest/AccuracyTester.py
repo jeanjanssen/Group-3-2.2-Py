@@ -5,7 +5,7 @@ import sys
 
 # Gets the name of the image file (filename) from sys.argv
 # imagePath = sys.argv[1]
-cascPath = "cascade4.xml"
+cascPath = "cascade3.xml"
 true_positives = 0
 false_positives = 0
 true_negatives = 0
