@@ -27,8 +27,12 @@ def main():
     #Preparing the training samples
 
     ir = ImageReader()
-    image_path_n = 'C:\\Users\\Kaci\\Documents\\Group-3-face-recognition\\TNegatives\\'
-    image_path_p = 'C:\\Users\\Kaci\\Documents\\Group-3-face-recognition\\TPositives\\'
+    image_path_n = 'C:\\Users\\Kaci\\Documents\\Group-3-face-recognition\\Negatives\\'
+    image_path_p = 'C:\\Users\\Kaci\\Documents\\Group-3-face-recognition\\Positives\\'
+
+    image_path_n = "C:\\Users\\robjl\\Documents\\DKE 2020\\Project 2-2 Adaboost Python\\Negatives\\"
+    image_path_p = "C:\\Users\\robjl\\Documents\\DKE 2020\\Project 2-2 Adaboost Python\\Positives\\"
+
 
     #image_list_n = ir.load_images_from_folder(image_path_n)
     #image_list_p = ir.load_images_from_folder(image_path_p)
@@ -38,20 +42,23 @@ def main():
     positive_samples = ir.get_positive_samples(image_path_p)
     negative_samples = ir.get_negative_samples(image_path_n)
 
+    #positive_samples = []
+    #negative_samples = []
+    #for i in range(5):
+     #   positive_samples.append(positive_s[i])
+    #for i in range(5):
+     #   negative_samples.append(negative_s[i])
+
     positive_samples = ir.convert_to_grayscale(positive_samples, image_path_p)
     negative_samples = ir.convert_to_grayscale(negative_samples, image_path_n)
 
     print("prepare")
-    for i in range(len(positive_samples) ):
-        #height = len(positive_samples[i][0])
-        #width = len(positive_samples[i])
-        sizes = positive_samples[i].shape
+    for i in range(len(positive_samples)):
         height = positive_samples[i].shape[0]
         width = positive_samples[i].shape[1]
         positive_samples[i] = ir.calculate_integral_image(height, width, positive_samples[i])
 
     for i in range(len(negative_samples)):
-        sizes = negative_samples[i].shape
         height = negative_samples[i].shape[0]
         width = negative_samples[i].shape[1]
         negative_samples[i] = ir.calculate_integral_image(height, width, negative_samples[i])
@@ -59,7 +66,7 @@ def main():
     np.random.shuffle(positive_samples)
     np.random.shuffle(negative_samples)
 
-    split = 0.90
+    split = 0.95
 
     pos_split = int(len(positive_samples) * split)
     neg_split = int(len(negative_samples) * split)
@@ -72,7 +79,6 @@ def main():
         width = len(training_set[i])
         training_set_integrals.append(training_set[i])
 
-    # TODO : need list of pos and neg samples
     pos_split = int(len(positive_samples) * split)
     neg_split = int(len(negative_samples) * split)
     nrPos = pos_split
@@ -108,6 +114,7 @@ def main():
 
 
     training_labels = [1] * nrPos + [-1] * nrNeg
+    print(training_labels)
 
     feature_weights = []
     weak_classifiers = []
@@ -122,12 +129,13 @@ def main():
     # Apply features and record the average score for each feature on the images
 
     for j in features:
-        print("Polarity")
+        #print("Polarity")
         avg_pos_score = 0.0
         avg_neg_score = 0.0
         for k in range(len(training_set)):
             score = j.get_score(1, 1, integral_im=training_set_integrals[k])
             scores.append(score)
+            print("score :", score)
             if training_labels[k] == 1:
                 avg_pos_score += score
             else:
@@ -144,17 +152,22 @@ def main():
         theta = (avg_pos_score + avg_neg_score) / 2
         thetas.append(theta)
 
+    print("Polarities :", polarities)
+    print("Thetas :", thetas)
     # Create the Cascade
-    F_target = 0.001
+    F_target = 0.1
     f = 0.5
+    f_i = 1
     F_i = 1
     cascade = []
     start_time = time.time()
     image_weights = [1.0/(2*nrPos)]*nrPos + [1.0/(2*nrNeg)]*nrNeg
+    print("im_weights :", image_weights)
     show_stuff = False
 
     while F_i > F_target:
-        print("train classifier")
+        print("train classifier--------------------------------------------------------------------------------------")
+        print("weird f value :", F_i)
         ## Train classifier for stage i
         best_weak_classifier = 0
         lowest_error = float("inf")
@@ -168,7 +181,7 @@ def main():
         cycle = 0
 
         # while f_i > f: # change condition TP>0.5 and TN>0.5 ?!
-        while (TP / nrPos < 1) and (TN / nrNeg < 1):
+        while (TP / nrPos < 0.5) and (TN / nrNeg < 0.5):
         #while (TP > 0.5) and (TN > 0.5):
             print("long while loop, error for loop, find threshold")
             total = sum(image_weights)
@@ -181,7 +194,7 @@ def main():
             loop_cnt = 0
             inner_loop_cnt = 0
             for j in features:
-                print("classifier object")
+                #print("classifier object")
                 # Create classifier object
                 w_classifier = WeakClassifier(j, thetas[loop_cnt], polarities[loop_cnt], 0)
 
@@ -217,7 +230,7 @@ def main():
             scores_debug = []
             for sample in range(len(training_set)):
                 # Get weighted classification error
-                score = best_weak_classifier.haar.get_score(0, 0, training_set_integrals[sample])
+                score = best_weak_classifier.haar.get_score(1, 1, training_set_integrals[sample])
                 scores_debug.append(score)
                 predicted.append(predict(score, best_weak_classifier))
 
@@ -227,9 +240,8 @@ def main():
             TN = 0.0
             colors_predicted = []
             for k in range(len(image_weights)):
-                print("labeling and predict")
+                #print("labeling and predict")
                 # if sample is correctly classified
-
                 if training_labels[k] == 1 and predicted[k] == -1:
                     FN += 1
                 if training_labels[k] == -1 and predicted[k] == 1:
@@ -242,13 +254,14 @@ def main():
                         TP += 1
                     if predicted[k] == -1:
                         TN += 1
-
                 if predicted[k] == -1:
                     colors_predicted.append('r')
                 else:
                     colors_predicted.append('g')
 
             f_i = (FP / (2 * nrNeg)) + (FN / (2 * nrPos))
+            print("TP/P :", TP / nrPos)
+            print("TN/n :", TN / nrNeg)
             cycle += 1
 
         cascade.append(best_weak_classifier)
@@ -259,7 +272,7 @@ def main():
         cascade_scores = []
         cascade_colors_predicted = []
         for l in range(len(training_set)):
-            print("add labels")
+            #print("add labels")
             strong_score = 0.0
             for w_class in cascade:
                 strong_score += w_class.weight * predict(
@@ -276,7 +289,12 @@ def main():
             if training_labels[l] == -1 and clas == 1:
                 strong_FP += 1
 
-    #Cascade list final
+        print("strong fp :", strong_FP)
+        F_i = (strong_FP / (2 * nrNeg)) + (strong_FN / (2 * nrPos))
+        print("Fi value here:", F_i)
 
+    #Cascade list final
+    for j in cascade:
+        print(j.haar.type)
 if __name__ == "__main__":
     main()

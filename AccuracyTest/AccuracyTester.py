@@ -5,7 +5,7 @@ import sys
 
 # Gets the name of the image file (filename) from sys.argv
 # imagePath = sys.argv[1]
-cascPath = "cascade.xml"
+cascPath = "cascade3.xml"
 true_positives = 0
 false_positives = 0
 true_negatives = 0
@@ -30,11 +30,10 @@ def load_images_from_folder(folder):
     return images
 
 
-image_list = load_images_from_folder(os.getcwd() + "\\TestImages")
+image_list = load_images_from_folder("C:\\Users\\jeanj\\PycharmProjects\\Group-3-2.2-Py\\AccuracyTest\\TestImages")
 
 # The face or faces in an image are detected
 # This section requires the most adjustments to get accuracy on face being detected.
-print(len(image_list))
 for i in range(len(image_list)):
     image = image_list[i]
 
@@ -86,4 +85,3 @@ print("Accuracy: ", accuracy)
 print("Recall: ", recall)
 print("Precision: ", precision)
 print("F-score: ", f_score)
-
