@@ -26,3 +26,13 @@ print(returnLocation())
 
 #Training the xml file:
 #"C:/Users/Arthur Vieillevoye/Downloads/opencv/build/x64/vc15/bin/opencv_traincascade.exe" -data OPencvTraining/ -vec pos.vec -bg neg.txt -numPos 500 -numNeg 250 -numStages 12 -w 24 -h 24 -acceptanceRatioBreakValue 10e-5
+
+
+# Training for the experiments face:
+# "C:/Users/Arthur Vieillevoye/Downloads/opencv/build/x64/vc15/bin/opencv_traincascade.exe"
+# -data OPencvTraining/Face/ -vec pos.vec -bg neg.txt -numPos 500 -numNeg 1000 -numStages 16 -w 24 -h 24 -acceptanceRatioBreakValue 10e-5
+
+
+# training for the experiments mouth:
+# "C:/Users/Arthur Vieillevoye/Downloads/opencv/build/x64/vc15/bin/opencv_traincascade.exe"
+# -data OPencvTraining/mouth/ -vec posMouth.vec -bg neg.txt -numPos 500 -numNeg 1500 -numStages 14 -w 15 -h 15 -acceptanceRatioBreakValue 10e-5
