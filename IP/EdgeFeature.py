@@ -31,16 +31,15 @@ class EdgeFeature:
     def get_score(self, x, y, integral_im):
 
         if self.type == 1:
-            p_l = int(round((self.w) / 2)) * self.h
-            p_d = (self.w * self.h) - p_l
+            p_l = int(round((self.h) / 2)) * self.w
+            p_d = (self.h * self.w) - p_l
             #sum_light = integral_im[x + int(round((self.w) / 2)), y + self.h] - integral_im[x - 1, y + self.h] - \
              #           integral_im[x + int(round((self.w) / 2)), y - 1] + integral_im[x - 1, y - 1]
             #sum_dark = integral_im[x + self.w, y + self.h] - integral_im[x + int(round((self.w) / 2)), y + self.h] - \
              #          integral_im[x + self.w, y - 1] + integral_im[x + int(round((self.w) / 2)) - 1, y - 1]
-
             sum_light = integral_im[y + self.h, x + int(round((self.w) / 2))] - integral_im[y + self.h, x - 1] - integral_im[y - 1, x + int(round((self.w) / 2))] + integral_im[y - 1, x - 1]
-            sum_dark = integral_im[y + self.h, x + self.w] - integral_im[y + self.h, x + int(round((self.w) / 2))] - integral_im[y - 1, x + self.w] + integral_im[y - 1, x + int(round((self.w) / 2)) - 1]
-            return (sum_dark / p_d) - (sum_light / p_l)
+            sum_dark = integral_im[y + self.h, x + self.w] - integral_im[y + self.h, x + int(round((self.w) / 2))] - integral_im[y - 1, x + self.w] + integral_im[y - 1, x + int(round((self.w) / 2))]
+            return ((sum_dark / p_d) - (sum_light / p_l))
 
         elif self.type == 2:
             p_d = int(round((self.h) / 2)) * self.w
@@ -54,7 +53,7 @@ class EdgeFeature:
             p_d = (self.w * self.h) - p_l
             sum_light = integral_im[y + int(round((self.h) / 2)), x + self.w] - integral_im[y + int(round((self.h) / 2)), x - 1] - integral_im[y - 1, x + self.w] + integral_im[y - 1, x - 1]
             sum_dark = integral_im[y + self.h, x + self.w] - integral_im[y + self.h, x - 1] - integral_im[y + int(round((self.h) / 2)), x + self.w] + integral_im[y + int(round((self.h) / 2)), x - 1]
-            return (sum_dark / p_d) - (sum_light / p_l)
+            return abs(((sum_dark / p_d) - (sum_light / p_l)))
 
         else:
             p_d = int(round((self.h) / 2)) * self.w

@@ -30,10 +30,6 @@ def main():
     image_path_n = 'C:\\Users\\Kaci\\Documents\\Group-3-face-recognition\\Negatives\\'
     image_path_p = 'C:\\Users\\Kaci\\Documents\\Group-3-face-recognition\\Positives\\'
 
-    image_path_n = "C:\\Users\\robjl\\Documents\\DKE 2020\\Project 2-2 Adaboost Python\\Negatives\\"
-    image_path_p = "C:\\Users\\robjl\\Documents\\DKE 2020\\Project 2-2 Adaboost Python\\Positives\\"
-
-
     #image_list_n = ir.load_images_from_folder(image_path_n)
     #image_list_p = ir.load_images_from_folder(image_path_p)
     #gray_image_set_p = ir.convert_to_grayscale(image_list_p, image_path_p)
@@ -72,27 +68,33 @@ def main():
     neg_split = int(len(negative_samples) * split)
 
     training_set = positive_samples[0:pos_split] + negative_samples[0:neg_split]
+    testing_set = positive_samples[pos_split:] + negative_samples[neg_split:]
     training_set_integrals = []
+    testing_set_integrals = []
+
+    for i in range(len(testing_set)):
+        testing_set_integrals.append(testing_set[i])
 
     for i in range(len(training_set)):
-        height = len(training_set[i][0])
-        width = len(training_set[i])
         training_set_integrals.append(training_set[i])
 
     pos_split = int(len(positive_samples) * split)
     neg_split = int(len(negative_samples) * split)
     nrPos = pos_split
     nrNeg = neg_split
+    nrPos_test = len(positive_samples) - nrPos
+    nrNeg_test = len(negative_samples) - nrNeg
 
     # Preparing the features we will us and train
-    haar1 = EdgeFeature(150, 200, 1)
-    haar2 = EdgeFeature(150, 200, 2)
-    haar3 = EdgeFeature(150, 200, 3)
-    haar4 = EdgeFeature(150, 200, 4)
-    haar5 = LineFeature(150, 200, 1)
-    haar6 = LineFeature(150, 200, 2)
-    haar7 = LineFeature(150, 200, 3)
-    haar8 = LineFeature(150, 200, 4)
+    haar1 = EdgeFeature(200, 200, 1)
+    haar2 = EdgeFeature(200, 200, 2)
+    haar3 = EdgeFeature(200, 200, 3)
+    haar4 = EdgeFeature(200, 200, 4)
+    haar5 = LineFeature(200, 200, 1)
+    haar6 = LineFeature(200, 200, 2)
+    haar7 = LineFeature(200, 200, 3)
+    haar8 = LineFeature(200, 200, 4)
+    #haar9 = LineFeature(200, 50, 1)
 
     haar_feature_types = [haar1, haar2, haar3, haar4, haar5, haar6, haar7, haar8]
     features = []
@@ -114,6 +116,7 @@ def main():
 
 
     training_labels = [1] * nrPos + [-1] * nrNeg
+    testing_labels = [1] * nrPos_test + [-1] * nrNeg_test
     print(training_labels)
 
     feature_weights = []
@@ -156,7 +159,7 @@ def main():
     print("Thetas :", thetas)
     # Create the Cascade
     F_target = 0.1
-    f = 0.5
+    f = 0.1
     f_i = 1
     F_i = 1
     cascade = []
@@ -165,9 +168,11 @@ def main():
     print("im_weights :", image_weights)
     show_stuff = False
 
+    old_f = 0
+    new_f = 0
     while F_i > F_target:
+    #while f_i > f:
         print("train classifier--------------------------------------------------------------------------------------")
-        print("weird f value :", F_i)
         ## Train classifier for stage i
         best_weak_classifier = 0
         lowest_error = float("inf")
@@ -247,6 +252,7 @@ def main():
                 if training_labels[k] == -1 and predicted[k] == 1:
                     FP += 1
 
+
                 # Update image weights
                 if training_labels[k] == predicted[k]:
                     image_weights[k] = image_weights[k] * beta_t
@@ -275,6 +281,7 @@ def main():
             #print("add labels")
             strong_score = 0.0
             for w_class in cascade:
+                #print(w_class.weight)
                 strong_score += w_class.weight * predict(
                     w_class.haar.get_score(1, 1, training_set_integrals[l]), w_class)
             cascade_scores.append(strong_score)
@@ -291,10 +298,48 @@ def main():
 
         print("strong fp :", strong_FP)
         F_i = (strong_FP / (2 * nrNeg)) + (strong_FN / (2 * nrPos))
-        print("Fi value here:", F_i)
+        print("weird f value :", F_i)
+        new_f = F_i
+        if old_f == new_f:
+            break
+        old_f = new_f
+
 
     #Cascade list final
+    print("len :", len(cascade))
     for j in cascade:
         print(j.haar.type)
+
+    FP_test = 0.0
+    FN_test = 0.0
+    TP_test = 0.0
+    TN_test = 0.0
+
+    scores = []
+    save = False
+
+    for t in range(len(testing_set)):
+        strong_score = 0.0
+        for w_class in cascade:
+            # print("Loc: " +str(w_class.haar.start))
+            strong_score += w_class.weight * predict(
+                w_class.haar.get_score(1, 1, testing_set[t]), w_class)
+        clas = np.sign(strong_score)
+        scores.append(strong_score)
+
+        if testing_labels[t] == 1 and clas == -1:
+            FN_test += 1
+
+        if testing_labels[t] == -1 and clas == 1:
+            FP_test += 1
+
+        if testing_labels[t] == 1 and clas == 1:
+            TP_test += 1
+
+        if testing_labels[t] == -1 and clas == -1:
+            TN_test += 1
+
+    print("True Pos test :", TP_test, "/", nrPos_test)
+    print("True Neg test :", TN_test, "/", nrNeg_test)
 if __name__ == "__main__":
     main()
