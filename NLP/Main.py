@@ -189,7 +189,6 @@ def main():
     X_test_counts = count_vect.transform(X_test.values.astype('U'))
 
     clf = classifier()
-    # clf = LogisticRegression(max_iter=1000)
     clf.fit(X_train_counts, y_train)
     y_predict = clf.predict(X_test_counts)
 

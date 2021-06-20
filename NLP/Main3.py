@@ -56,7 +56,7 @@ def main():
         algorithm_explained_variance_dict[key] = 1 - algorithm_variance_dict[key] / sum(algorithm_variance_dict.values())
 
     # print(len(algorithm_results_dict["BIGRAM"]) / 10)
-    # 0.print(algorithm_results_dict)
+    # print(algorithm_results_dict)
     print(algorithm_mean_dict)
     print(algorithm_scaled_mean_dict)
     print(algorithm_variance_dict)
