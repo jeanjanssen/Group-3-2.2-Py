@@ -5,7 +5,8 @@ import sys
 
 # Gets the name of the image file (filename) from sys.argv
 # imagePath = sys.argv[1]
-cascPath = "cascade3.xml"
+# Add absolute path from your computer!!!
+cascPath = "C:\\Users\\jeanj\\PycharmProjects\\Group-3-2.2-Py\\OpencvTraining\\Face\\face_cascade500.xml"
 true_positives = 0
 false_positives = 0
 true_negatives = 0
@@ -29,7 +30,7 @@ def load_images_from_folder(folder):
             images.append(img)
     return images
 
-
+# Add absolute path from your computer!!!
 image_list = load_images_from_folder("C:\\Users\\jeanj\\PycharmProjects\\Group-3-2.2-Py\\AccuracyTest\\TestImages")
 
 # The face or faces in an image are detected
@@ -43,6 +44,7 @@ for i in range(len(image_list)):
         gray,
         scaleFactor=1.1,
         minNeighbors=5,
+        # For mouth classifier use minNeighbour=100 otherwise, minNeighbour=5
         minSize=(1, 1),
         flags=cv2.CASCADE_SCALE_IMAGE
     )
@@ -56,8 +58,10 @@ for i in range(len(image_list)):
     if len(faces) >= 1:
         if filename_list[i] + '\n' in content_pos:
             true_positives += 1
+            if len(faces) > 1:
+                false_positives = false_positives + len(faces) - 1
         else:
-            false_positives += 1
+            false_positives = false_positives + len(faces)
     else:
         if filename_list[i] + '\n' in content_neg:
             true_negatives += 1
@@ -75,7 +79,7 @@ accuracy = (true_positives + true_negatives) / (true_positives + false_positives
 recall = true_positives / (true_positives + false_negatives)
 precision = true_positives / (true_positives + false_positives)
 b = 1
-f_score = ((b**2 + 1) * precision * recall) / ((b**2 * precision) + recall)
+f_score = ((b ** 2 + 1) * precision * recall) / ((b ** 2 * precision) + recall)
 
 print("TP: ", true_positives)
 print("FP: ", false_positives)
