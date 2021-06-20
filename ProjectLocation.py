@@ -1,12 +1,13 @@
 import os
 
 
-def returnLocation():
+def return_location():
     return os.getcwd()
 
-#Creates text file with location and name of negative images.
+
+# Creates text file with location and name of negative images.
 def generate_negative_description_file(path_argument):
-    path = returnLocation()
+    path = return_location()
     path = path + path_argument
     with open('AccuracyTest/tneg.txt', 'w') as f:
         # loop over all the filenames
@@ -16,16 +17,17 @@ def generate_negative_description_file(path_argument):
 
 generate_negative_description_file("\AccuracyTest\TNeg")
 
-print(returnLocation())
+print(return_location())
 
+# Add absolute path from your computer!!!
 # To create the positive images
-#"C:/Users/Arthur Vieillevoye/Downloads/opencv/build/x64/vc15/bin/opencv_annotation.exe" --annotations=pos.txt --images=TPositives/
+# "C:/Users/Arthur Vieillevoye/Downloads/opencv/build/x64/vc15/bin/opencv_annotation.exe" --annotations=pos.txt --images=TPositives/
 
-#To sample in the positive images:
-#"C:/Users/Arthur Vieillevoye/Downloads/opencv/build/x64/vc15/bin/opencv_createsamples.exe" -info pos.txt -w 24 -h 24 -num 1000 -vec pos.vec
+# To sample in the positive images:
+# "C:/Users/Arthur Vieillevoye/Downloads/opencv/build/x64/vc15/bin/opencv_createsamples.exe" -info pos.txt -w 24 -h 24 -num 1000 -vec pos.vec
 
-#Training the xml file:
-#"C:/Users/Arthur Vieillevoye/Downloads/opencv/build/x64/vc15/bin/opencv_traincascade.exe" -data OPencvTraining/ -vec pos.vec -bg neg.txt -numPos 500 -numNeg 250 -numStages 12 -w 24 -h 24 -acceptanceRatioBreakValue 10e-5
+# Training the xml file:
+# "C:/Users/Arthur Vieillevoye/Downloads/opencv/build/x64/vc15/bin/opencv_traincascade.exe" -data OPencvTraining/ -vec pos.vec -bg neg.txt -numPos 500 -numNeg 250 -numStages 12 -w 24 -h 24 -acceptanceRatioBreakValue 10e-5
 
 
 # Training for the experiments face:
