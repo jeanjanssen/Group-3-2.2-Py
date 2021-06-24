@@ -19,7 +19,23 @@ from NLP.Main import argmax_class_dict
 def main():
     df = pd.read_csv("brown_relabelled.csv")
 
+    """
+    tri_model = createTriModel(2, df)
+    bi_model = createBiModel(2, df)
+
+    for i in range(0, 20):
+        text = bigramPredictor("USE_RANDOM", df, 1, bi_model, 2)
+        text = printList(bi_tri_gramPredictor(printList(text), df, 30, True, bi_model, tri_model, 2))
+        print()
+        print(text)
+        # print(text[0].capitalize() + text[1:] + ".")
+    """
+
     X_train, X_test, y_train, y_test = df.words, df.words[20000:120000], df.tags, df.tags[20000:120000]
+
+    X_test = pd.Series(["i", "want", "food", "right", "now"])
+
+    print(X_test.values)
 
     count_vect = CountVectorizer()
     X_train_counts = count_vect.fit_transform(X_train.values.astype('U'))
@@ -37,30 +53,33 @@ def main():
     tri_model = createTriModel(1, df)
     for i in X_test.index:
         y_predict_selfNB.append(word_predict(X_test[i], occ, freq, clf_NB.classes_))
-        y_predict_NG.append(trigramPredictor(df.words[i-2] + " " + df.words[i-2], df, 1, tri_model, 1)[-1])
-        y_predict_NGNB.append(NGNB(df.words[i-2] + " " + df.words[i-2], df, 1, tri_model, 1, X_test[i], occ, freq, clf_NB.classes_))
-        if i % 5000 == 0:
-            print(str((i - 20000) / 1000) + "%")
+        y_predict_NG.append(trigramPredictor(X_test.values[i-2] + " " + X_test.values[i-2], df, 1, tri_model, 1)[-1])
+        y_predict_NGNB.append(NGNB(X_test.values[i-2] + " " + X_test.values[i-2], df, 1, tri_model, 1, X_test[i], occ, freq, clf_NB.classes_))
     y_predict_selfNB = np.array(y_predict_selfNB)
     y_predict_NG = np.array(y_predict_NG)
     y_predict_NGNB = np.array(y_predict_NGNB)
 
-    CR_NB = classification_report(y_test, y_predict_NB)
-    CR_selfNB = classification_report(y_test, y_predict_selfNB)
-    CR_NG = classification_report(y_test, y_predict_NG)
-    CR_NGNB = classification_report(y_test, y_predict_NGNB)
+    print("Scikit-learn Naive-Bayes: " + str(y_predict_NB))
+    print("Naive-Bayes: " + str(y_predict_selfNB))
+    print("Trigram: " + str(y_predict_NG))
+    print("Naive-Bayes Trigram: " + str(y_predict_NGNB))
 
-    CR_dict = {
-        "CR_NB": CR_NB,
-        "CR_selfNB": CR_selfNB,
-        "CR_NG": CR_NG,
-        "CR_NGNB": CR_NGNB
-    }
+    # CR_NB = classification_report(y_test, y_predict_NB)
+    # CR_selfNB = classification_report(y_test, y_predict_selfNB)
+    # CR_NG = classification_report(y_test, y_predict_NG)
+    # CR_NGNB = classification_report(y_test, y_predict_NGNB)
 
-    for key in CR_dict.keys():
-        print(key)
-        print(CR_dict[key])
-        print()
+    # CR_dict = {
+        # "CR_NB": CR_NB,
+        # "CR_selfNB": CR_selfNB,
+        # "CR_NG": CR_NG,
+        # "CR_NGNB": CR_NGNB
+    # }
+
+    # for key in CR_dict.keys():
+        # print(key)
+        # print(CR_dict[key])
+        # print()
 
 def NGNB(input, df, max, model, mode, word, occ, freq, classes):
     # Calculate prior probabilities
@@ -220,7 +239,7 @@ def bi_tri_gramPredictor(input, df, max, use_weights, bi_model, tri_model, mode)
         for word in random.sample(list(tri_model[tuple(text[-2:])].keys()), len(tri_model[tuple(text[-2:])].keys())):
             weight = 1
             if use_weights:
-                weight = random.randint(1, 5)
+                weight = random.randint(1, 3)
             # accumulator += (weight * tri_model[tuple(text[-2:])][word] + bi_model[tuple(text[-1:])][word]) / (1 + weight)
             current_prob = (weight * tri_model[tuple(text[-2:])][word] + bi_model[tuple(text[-1:])][word]) / (1 + weight)
             # select words that are above the probability threshold
